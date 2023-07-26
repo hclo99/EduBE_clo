@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ContentsService } from './contents.service';
-import { ContentsController } from './contents.controller';
+import { ContentsService } from './service/contents.service';
+import { ContentsController } from './controller/contents.controller';
 
 @Module({
   providers: [ContentsService],
