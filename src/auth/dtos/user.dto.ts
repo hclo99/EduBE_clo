@@ -13,3 +13,11 @@ export class CreateUserDto {
   @IsNumber()
   level: number;
 }
+
+export class LoginDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  password: string;
+}
