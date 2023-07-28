@@ -3,8 +3,8 @@ POST http://localhost:8000/auth/signup
 Content-Type: application/json
 
 {
-    "name": "sparta3",
-    "email": "sparta3@sparta.com",
+    "name": "sparta4",
+    "email": "sparta4@sparta.com",
     "password": "qwer1234",
     "level": 1
 }
