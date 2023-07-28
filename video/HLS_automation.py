@@ -5,6 +5,7 @@ import boto3
 import psycopg2
 from youtube_dl import YoutubeDL
 import dotenv
+from ABS_quality import ABS_quality
 
 path = "/Users/heojisu/video"
 
@@ -38,7 +39,7 @@ def get_video_length(file_path):
     )
     return float(result.stdout)
     
-def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
+def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str, abs_qualities):
     s3 = boto3.client("s3", aws_access_key, aws_secret_key)
     conn = psycopg2.connect(conn_str)
     cur = conn.cursor()
@@ -94,13 +95,13 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
 #         "outtmpl": f"{path}/%(title)s.%(ext)s",
 #     }
 #     uploaded_files = []
-# ​
+
 #     with YoutubeDL(ydl_opts) as ydl:
 #         for url in playlist_urls:
 #             # 딕셔너리
 #             info_dict = ydl.extract_info(url, download=True)
 #             original_name = info_dict.get("title", None)  # 원래 파일명
-# ​
+
 #             new_name = str(uuid.uuid4())
 #             source_file = (
 #                 f'{path}/{original_name}.{info_dict["ext"]}'  # full name=파일명과 확장자
@@ -111,13 +112,13 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
 #             source_file = (
 #                 f'{path}/{new_name}.{info_dict["ext"]}'  # 변경된 파일경로. 원본 파일명은 변수로 전달
 #             )
-# ​
+
 #             # 파일명(name), 경로(source_file)
 #             convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str)
 #             uploaded_files.append(new_name)
-# ​
+
 #     return uploaded_files
-# ​
+
 
 playlist_urls = [
     "https://www.youtube.com/watch?v=SzXWUdp4ibE&list=PLcQFUjwl9703Kl_iQc7IrH7_xuTxVPwLw"
