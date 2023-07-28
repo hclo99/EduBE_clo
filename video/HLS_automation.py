@@ -7,20 +7,21 @@ from youtube_dl import YoutubeDL
 import dotenv
 from ABS_quality import ABS_quality
 
-path = "/Users/heojisu/video"
+path = "/Users/jungh/Downloads"
 
-dbname = process.env.PY_DB
-user = process.env.PY_USERNAME
-password = process.env.PY_PASSWORD
-host = process.env.PY_HOST
-port = process.env.PY_PORT
+dotenv.load_dotenv()
+dbname = os.getenv("PY_DB")
+user = os.getenv("PY_USERNAME")
+password = os.getenv("PY_PASSWORD")
+host = os.getenv("PY_HOST")
+port = os.getenv("PY_PORT")
 
 conn_str = f"dbname={dbname} user={user} password={password} host={host} port={port}"
 
-bucket_name = process.env.S3_BUCKETNAME
+bucket_name = os.getenv("S3_BUCKETNAME")
 
-aws_access_key = process.env.AWS_access_key
-aws_secret_key = process.env.AWS_secret_key
+aws_access_key = os.getenv("AWS_access_key")
+aws_secret_key = os.getenv("AWS_secret_key")
 
 def get_video_length(file_path):
     result = subprocess.run(
@@ -89,35 +90,35 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str, 
             (original_name, new_name, video_length),
         )
 
-# def download_from_playlist(playlist_urls, bucket_name, conn_str):
-#     print("fr: ", playlist_urls)
-#     ydl_opts = {
-#         "outtmpl": f"{path}/%(title)s.%(ext)s",
-#     }
-#     uploaded_files = []
+def download_from_playlist(playlist_urls, bucket_name, conn_str):
+    print("fr: ", playlist_urls)
+    ydl_opts = {
+        "outtmpl": f"{path}/%(title)s.%(ext)s",
+    }
+    uploaded_files = []
 
-#     with YoutubeDL(ydl_opts) as ydl:
-#         for url in playlist_urls:
-#             # 딕셔너리
-#             info_dict = ydl.extract_info(url, download=True)
-#             original_name = info_dict.get("title", None)  # 원래 파일명
+    with YoutubeDL(ydl_opts) as ydl:
+        for url in playlist_urls:
+            # 딕셔너리
+            info_dict = ydl.extract_info(url, download=True)
+            original_name = info_dict.get("title", None)  # 원래 파일명
 
-#             new_name = str(uuid.uuid4())
-#             source_file = (
-#                 f'{path}/{original_name}.{info_dict["ext"]}'  # full name=파일명과 확장자
-#             )
-#             os.rename(
-#                 source_file, f'{path}/{new_name}.{info_dict["ext"]}'
-#             )  # uuid로 확장자 변경
-#             source_file = (
-#                 f'{path}/{new_name}.{info_dict["ext"]}'  # 변경된 파일경로. 원본 파일명은 변수로 전달
-#             )
+            new_name = str(uuid.uuid4())
+            source_file = (
+                f'{path}/{original_name}.{info_dict["ext"]}'  # full name=파일명과 확장자
+            )
+            os.rename(
+                source_file, f'{path}/{new_name}.{info_dict["ext"]}'
+            )  # uuid로 확장자 변경
+            source_file = (
+                f'{path}/{new_name}.{info_dict["ext"]}'  # 변경된 파일경로. 원본 파일명은 변수로 전달
+            )
 
-#             # 파일명(name), 경로(source_file)
-#             convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str)
-#             uploaded_files.append(new_name)
+            # 파일명(name), 경로(source_file)
+            convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str)
+            uploaded_files.append(new_name)
 
-#     return uploaded_files
+    return uploaded_files
 
 
 playlist_urls = [
