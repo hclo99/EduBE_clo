@@ -4,23 +4,23 @@ import uuid
 import boto3
 import psycopg2
 from youtube_dl import YoutubeDL
-​
+import dotenv
+
 path = "/Users/heojisu/video"
-​
-dbname = "db2"
-user = "test"
-password = "test"
-host = "localhost"
-port = "5432"
-​
+
+dbname = process.env.PY_DB
+user = process.env.PY_USERNAME
+password = process.env.PY_PASSWORD
+host = process.env.PY_HOST
+port = process.env.PY_PORT
+
 conn_str = f"dbname={dbname} user={user} password={password} host={host} port={port}"
-​
-bucket_name = "eduplaym"
-​
-aws_access_key = "AKIAY6GK3SGERXU46VER"
-aws_secret_key = "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"
-​
-​
+
+bucket_name = process.env.S3_BUCKETNAME
+
+aws_access_key = process.env.AWS_access_key
+aws_secret_key = process.env.AWS_secret_key
+
 def get_video_length(file_path):
     result = subprocess.run(
         [
@@ -37,13 +37,12 @@ def get_video_length(file_path):
         stderr=subprocess.STDOUT,
     )
     return float(result.stdout)
-​
-​
+    
 def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
     s3 = boto3.client("s3", aws_access_key, aws_secret_key)
     conn = psycopg2.connect(conn_str)
     cur = conn.cursor()
-​
+
     # HLS 변환) Create a unique directory for each HLS conversion
     hls_directory = os.path.join(path, new_name)  # hls 파일들을 저장할 폴더 경로 생성
     os.makedirs(hls_directory, exist_ok=True)  # 실제 폴더 생성
@@ -71,9 +70,9 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
         dest_file,
     ]
     subprocess.run(command)
-​
+
     video_length = get_video_length(source_file)
-​
+
     # S3 업로드) Upload all files in HLS directory to S3
     for file in os.listdir(hls_directory):  # 폴더내 파일들을 리스트로
         #  업로드할 파일의 경로, 버킷명, S3 버킷내 저장할 파일명
@@ -81,15 +80,14 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
             os.path.join(hls_directory, file), bucket_name, file
         )  # f'{new_name}/{file}' 폴더구조는 너무 길어질듯.
         # s3_url = f"https://{bucket_name}.s3.amazonaws.com/{file}"
-​
+
         # DB 저장) 유저id는 임의로 입력 ***
         cur.execute(
             "INSERT INTO File (original_name, new_name, length) \
                     VALUES (%s, %s, %s)",
             (original_name, new_name, video_length),
         )
-​
-​
+
 # def download_from_playlist(playlist_urls, bucket_name, conn_str):
 #     print("fr: ", playlist_urls)
 #     ydl_opts = {
@@ -120,7 +118,7 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str):
 # ​
 #     return uploaded_files
 # ​
-​
+
 playlist_urls = [
     "https://www.youtube.com/watch?v=SzXWUdp4ibE&list=PLcQFUjwl9703Kl_iQc7IrH7_xuTxVPwLw"
     # 'https://www.youtube.com/watch?v=0daUXxrWipQ&list=PLcQFUjwl9700rBN-6PtYL1jBFoyQ_YAB0',
@@ -128,7 +126,6 @@ playlist_urls = [
     # 'https://www.youtube.com/watch?v=bGPZhzAeBdQ&list=PL5iY69aga81xUK7lLlrmzKh_ybiQ8eRre',
     # 'https://www.youtube.com/watch?v=p2m9m535p9Y&list=PLF5FhqjeJXdNqzfqPRSGdkI4HTBn1w2CY'
 ]
-​
-​
+
 uploaded_files = download_from_playlist(playlist_urls, bucket_name, conn_str)
 print(uploaded_files)
