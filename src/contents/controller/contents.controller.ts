@@ -11,7 +11,7 @@ export class ContentsController {
     console.log('fr:', topic, files);
     return files.map((file) => ({
       name: file.name,
-      url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}.m3u8`,
+      url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_variant.m3u8`,
       thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}-view.m3u8`,
       length: file.length,
       sentence: file.sentence,
