@@ -9,6 +9,8 @@ async function bootstrap() {
       whitelist: true, // 페이로드와 DTO 클래스를 비교해 수신해서는 안되는 속성을 자동으로 제거하는 옵션(유효성이 검사된 객체만 수신)
     }),
   );
+  app.enableCors();
+
   await app.listen(8000);
 }
 
