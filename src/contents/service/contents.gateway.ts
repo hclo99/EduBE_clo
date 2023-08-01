@@ -17,7 +17,7 @@ export class ContentsGateway {
   constructor(private contentsService: ContentsService) {}
 
   private currentQuiz = 0;
-  // quizzes 배열에서 + 1 로직.
+  // quizzes 배열에서 + 1 로직..
   private quizzes: Quiz[] = [];
 
   @SubscribeMessage('startQuiz')
