@@ -13,6 +13,16 @@ export class ContentsService {
     @InjectRepository(Topic) private topicRepo: Repository<Topic>,
   ) {}
 
+  async findAllFiles(): Promise<{ file: Content; quiz: Quiz }[]> {
+    const files = await this.contentRepo.find();
+    const quizzes = await this.quizRepo.find();
+
+    return files.map((file) => {
+      const randomQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
+      return { file, quiz: randomQuiz };
+    });
+  }
+
   async findByTopic(topicId: number): Promise<{ file: Content; quiz: Quiz }[]> {
     const files = await this.contentRepo.find({
       where: { topic: { id: topicId } },

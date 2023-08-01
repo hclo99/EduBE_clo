@@ -7,6 +7,20 @@ export class ContentsController {
   constructor(private contentsService: ContentsService) {}
 
   @Get()
+  async getAllFiles() {
+    const files = await this.contentsService.findAllFiles();
+    return files.map(({ file, quiz }) => {
+      return {
+        name: file.name,
+        url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_variant.m3u8`,
+        thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}-view.m3u8`,
+        length: file.length,
+        quiz: quiz.quiz,
+      };
+    });
+  }
+
+  @Get()
   async getFilesByTopic(@Query('topic') topicId: number) {
     const files = await this.contentsService.findByTopic(topicId);
     return files.map(({ file, quiz }) => {
