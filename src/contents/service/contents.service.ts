@@ -14,7 +14,7 @@ export class ContentsService {
   ) {}
 
   async findAllFiles(): Promise<{ file: Content; quiz: Quiz }[]> {
-    const files = await this.contentRepo.find();
+    const files = await this.contentRepo.find({ where: { quality: 'view' } });
     const quizzes = await this.quizRepo.find();
 
     return files.map((file) => {

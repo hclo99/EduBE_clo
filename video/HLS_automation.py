@@ -108,55 +108,6 @@ def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str, 
     conn.commit()
     conn.close()
 
-# def convert_to_hls(original_name, new_name, source_file, bucket_name, conn_str, abr_qualities):
-#     s3 = boto3.client("s3", aws_access_key, aws_secret_key)
-#     conn = psycopg2.connect(conn_str)
-#     cur = conn.cursor()
-
-#     # HLS 변환) Create a unique directory for each HLS conversion
-#     hls_directory = os.path.join(path, new_name)  # hls 파일들을 저장할 폴더 경로 생성
-#     os.makedirs(hls_directory, exist_ok=True)  # 실제 폴더 생성
-#     dest_file = os.path.join(
-#         hls_directory, f"{new_name}_{abr_qualities.name}.m3u8"
-#     )  # 기존 path가 아니라 생성된 폴더내. full 경로&파일명
-#     command = [
-#         "ffmpeg",
-#         "-i",
-#         source_file,
-#         "-profile:v",
-#         "baseline",
-#         "-level",
-#         "3.0",
-#         "-s",
-#         "640x360",
-#         "-start_number",
-#         "0",
-#         "-hls_time",
-#         "4",
-#         "-hls_list_size",
-#         "0",
-#         "-f",
-#         "hls",
-#         dest_file,
-#     ]
-#     subprocess.run(command)
-
-#     video_length = get_video_length(source_file)
-
-#     # S3 업로드) Upload all files in HLS directory to S3
-#     for file in os.listdir(hls_directory):  # 폴더내 파일들을 리스트로
-#         #  업로드할 파일의 경로, 버킷명, S3 버킷내 저장할 파일명
-#         s3.upload_file(
-#             os.path.join(hls_directory, file), bucket_name, file
-#         )  # f'{new_name}/{file}' 폴더구조는 너무 길어질듯.
-#         # s3_url = f"https://{bucket_name}.s3.amazonaws.com/{file}"
-
-#         # DB 저장) 유저id는 임의로 입력 ***
-#         cur.execute(
-#             "INSERT INTO File (original_name, new_name, length) \
-#                     VALUES (%s, %s, %s)",
-#             (original_name, new_name, video_length),
-#         )
 
 def download_from_playlist(playlist_urls, bucket_name, conn_str):
     print("fr: ", playlist_urls)

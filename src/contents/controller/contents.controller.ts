@@ -9,15 +9,18 @@ export class ContentsController {
   @Get()
   async getAllFiles() {
     const files = await this.contentsService.findAllFiles();
-    return files.map(({ file, quiz }) => {
-      return {
-        name: file.name,
-        url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_variant.m3u8`,
-        thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}-view.m3u8`,
-        length: file.length,
-        quiz: quiz.quiz,
-      };
-    });
+    return files
+      .map(({ file, quiz }) => {
+        return {
+          id: file.id,
+          name: file.name,
+          url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_variant.m3u8`,
+          thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}-view.m3u8`,
+          length: file.length,
+          quiz: quiz.quiz,
+        };
+      })
+      .sort((a, b) => b.id - a.id);
   }
 
   @Get()

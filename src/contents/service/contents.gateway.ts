@@ -28,7 +28,28 @@ export class ContentsGateway {
     console.log('io: ', topicId);
     const quizzes = await this.contentsService.findQuizzesByTopic(topicId); // quizzes 프로퍼티만 추출하여 할당
     this.quizzes = quizzes;
-    client.emit('sendQuiz', this.quizzes);
+    // client.emit('sendQuiz', this.quizzes);
+    this.sendRandomQuiz(client);
+  }
+
+  @SubscribeMessage('sendAnswer')
+  async handleSendAnswer(
+    @MessageBody() answerData: { quizId: number; isCorrect: boolean },
+    @ConnectedSocket() client: Socket,
+  ): Promise<void> {
+    console.log('Received answer: ', answerData);
+  }
+
+  private sendRandomQuiz(client: Socket): void {
+    // 랜덤 인덱스 생성
+    const randomIndex = Math.floor(Math.random() * this.quizzes.length);
+    // 해당 인덱스의 퀴즈 선택
+    const quiz = this.quizzes[randomIndex];
+    console.log('quiz: ', quiz);
+    // 선택된 퀴즈를 배열에서 제거
+    this.quizzes.splice(randomIndex, 1);
+    // 선택된 퀴즈를 클라이언트에게 전송
+    client.emit('sendQuiz', quiz);
   }
 }
 
