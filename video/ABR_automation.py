@@ -33,8 +33,7 @@ def generate_filename(prefix):
     if prefix not in index_dict:
         index_dict[prefix] = 1
 
-    filename = f"{prefix}{index_dict[prefix]:01d}"
-    index_dict[prefix] += 1
+    filename = f"{prefix}{index_dict[prefix]:02d}"
     return filename
 
 
@@ -115,9 +114,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
 
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
-download_and_convert(playlist_url, "b", abr_qualities, 1)
+download_and_convert(playlist_url, "h", abr_qualities, 1)
 
-
-# b01_H , b02_M 이런식으로 되는 중! 수정 필요
 # variant 파일 생성되도록
 # view 파일 생성되도록 
