@@ -112,9 +112,30 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
             shutil.move(source_file, os.path.join(output_directory, file_name))
 
 
+def create_m3u8_file(file_path, segments):
+    with open(file_path, "w") as f:
+        f.write("#EXTM3U\n")
+
+        for segment in segments:
+            f.write(f"#EXTINF#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
+            f.write(f"{segment['url']}\n")
+
+segments = [
+    {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
+    {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
+    {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
+]
+
+output_directory =  f"{path}"
+create_m3u8_file(os.path.join(output_directory, f"{new_name}-variant.m3u8"), segments)
+
+
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
 download_and_convert(playlist_url, "h", abr_qualities, 1)
+create_m3u8_file()
+
 
 # variant 파일 생성되도록
 # view 파일 생성되도록 
+# 원본파일 마지막에 이동되도록
