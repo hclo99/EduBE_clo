@@ -4,6 +4,7 @@ import boto3
 import psycopg2
 import shutil
 import dotenv
+import time
 from ABR_quality import abr_qualities
 
 dotenv.load_dotenv()
@@ -17,8 +18,8 @@ conn_str = f"dbname={dbname} user={user} password={password} host={host} port={p
 bucket_name = os.getenv("S3_BUCKETNAME")
 
 session = boto3.Session(
-    aws_access_key_id="AKIAY6GK3SGEYA7AOJO5",
-    aws_secret_access_key="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",
+    aws_access_key_id = os.getenv("AWS_access_key"),
+    aws_secret_access_key = os.getenv("AWS_secret_key"),
 )
 
 # 경로 설정
@@ -51,16 +52,16 @@ def upload_s3(file_name, new_name, quality, topicId):
         shutil.move(local_path, os.path.join(output_directory, file_name))
 
 
-def create_m3u8_file(file_path, segments):
+def create_variant_m3u8(file_path, segments):
     with open(file_path, "w") as f:
         f.write("#EXTM3U\n")
 
         for segment in segments:
-            f.write(f"#EXTINF#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
+            f.write(f"#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
             f.write(f"{segment['url']}\n")
 
     s3 = session.client("s3")
-    s3.upload_file(file_path, bucket_name, os.path.basename(file_path))
+    s3.upload_file(file_path, bucket_name, os.path.basename(file_path))   
 
 
 def download_and_convert(playlist_url, prefix, quality_list, topicId):
@@ -118,13 +119,16 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
             ]
             subprocess.run(command)
 
+    # modify_m3u8_file()
+
+
     # 퀄리티별로 생성된 m3u8 파일들을 포함한 variant m3u8 파일 생성
     segments = [
         {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
         {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
         {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
     ]
-    create_m3u8_file(os.path.join(output_directory, f"{new_name}-variant.m3u8"), segments)
+    create_variant_m3u8(os.path.join(output_directory, f"{new_name}_variant.m3u8"), segments)
 
     # S3 업로드 (퀄리티별로 생성된 ts 파일들을 S3에 업로드)
     upload_s3(file_name, new_name, quality_name, topicId)
@@ -134,11 +138,15 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
 
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
+start_time = time.time()
 download_and_convert(playlist_url, "h", abr_qualities, 1)
+end_time = time.time()
+execution_time = end_time - start_time
+print(f"실행 시간 ======> {execution_time}초")
+
 
 
 # view 파일 생성되도록 
-# 코드 실행 시간 측정
 # 영상 다운로드를 for문 밖으로 빼기
 # 여러파일이 다운로드 되었을 때의 이름 변경
 # 여러파일이 다운로드 될 때 로직 확인
