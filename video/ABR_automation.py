@@ -52,6 +52,19 @@ def upload_s3(file_name, new_name, quality, topicId):
         shutil.move(local_path, os.path.join(output_directory, file_name))
 
 
+def modify_m3u8_file(file_path):
+    with open(file_path, "r") as f:
+        lines = f.readlines()
+
+    # 첫 번째 줄부터 view0.ts를 남깁니다.
+    modified_lines = lines[:6]
+
+    # 수정된 줄들을 파일에 다시 씁니다.
+    with open(file_path, "w") as f:
+        f.writelines(modified_lines)
+        f.write("#EXT-X-ENDLIST\n")
+
+
 def create_variant_m3u8(file_path, segments):
     with open(file_path, "w") as f:
         f.write("#EXTM3U\n")
@@ -69,6 +82,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
         quality_name = quality["name"]
         quality_profile = quality["profile"]
         quality_level = quality["level"]
+        quality_type = quality["type"]
         quality_resolution = quality["resolution"]
         quality_time = quality["time"]
         quality_bitrate = quality["bitrate"]
@@ -103,7 +117,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
                 quality_profile,
                 "-level",
                 quality_level,
-                "-s",
+                quality_type,
                 quality_resolution,
                 "-start_number",
                 "0",
@@ -119,8 +133,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
             ]
             subprocess.run(command)
 
-    # modify_m3u8_file()
-
+    modify_m3u8_file(os.path.join(process_directory, f"{new_name}_view.m3u8"))
 
     # 퀄리티별로 생성된 m3u8 파일들을 포함한 variant m3u8 파일 생성
     segments = [
@@ -145,8 +158,6 @@ execution_time = end_time - start_time
 print(f"실행 시간 ======> {execution_time}초")
 
 
-
-# view 파일 생성되도록 
 # 영상 다운로드를 for문 밖으로 빼기
 # 여러파일이 다운로드 되었을 때의 이름 변경
 # 여러파일이 다운로드 될 때 로직 확인
