@@ -49,9 +49,6 @@ def upload_s3(file_name, new_name, quality, topicId):
 
         # 변환된 파일들을 process 디렉토리에서 output 디렉토리로 이동
         shutil.move(local_path, os.path.join(output_directory, file_name))
-        
-    variant_m3u8_file = os.path.join(output_directory, f"{new_name}-variant.m3u8")
-    s3.upload_file(variant_m3u8_file, bucket_name, f"{new_name}-variant.m3u8")
 
 
 def create_m3u8_file(file_path, segments):
@@ -62,6 +59,9 @@ def create_m3u8_file(file_path, segments):
             f.write(f"#EXTINF#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
             f.write(f"{segment['url']}\n")
 
+    s3 = session.client("s3")
+    s3.upload_file(file_path, bucket_name, os.path.basename(file_path))
+
 
 def download_and_convert(playlist_url, prefix, quality_list, topicId):
     for quality in quality_list:
@@ -69,11 +69,12 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
         quality_profile = quality["profile"]
         quality_level = quality["level"]
         quality_resolution = quality["resolution"]
+        quality_time = quality["time"]
         quality_bitrate = quality["bitrate"]
 
         print(f"{quality_name} 퀄리티로 HLS 파일 생성 중...")
 
-        # playlist의 모든 영상 다운로드
+        # playlist의 영상 다운로드
         command = [
             "yt-dlp",
             "-f",
@@ -106,7 +107,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
                 "-start_number",
                 "0",
                 "-hls_time",
-                "60",
+                quality_time,
                 "-hls_list_size",
                 "0",
                 "-b:v",
@@ -137,6 +138,7 @@ download_and_convert(playlist_url, "h", abr_qualities, 1)
 
 
 # view 파일 생성되도록 
-# 원본파일 마지막에 이동되도록
+# 코드 실행 시간 측정
+# 영상 다운로드를 for문 밖으로 빼기
 # 여러파일이 다운로드 되었을 때의 이름 변경
 # 여러파일이 다운로드 될 때 로직 확인
