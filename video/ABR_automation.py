@@ -56,10 +56,8 @@ def modify_m3u8_file(file_path):
     with open(file_path, "r") as f:
         lines = f.readlines()
 
-    # 첫 번째 줄부터 view0.ts를 남깁니다.
     modified_lines = lines[:6]
 
-    # 수정된 줄들을 파일에 다시 씁니다.
     with open(file_path, "w") as f:
         f.writelines(modified_lines)
         f.write("#EXT-X-ENDLIST\n")
@@ -78,6 +76,18 @@ def create_variant_m3u8(file_path, segments):
 
 
 def download_and_convert(playlist_url, prefix, quality_list, topicId):
+    # playlist의 영상 다운로드
+    command = [
+        "yt-dlp",
+        "-f",
+        "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "-o",
+        f"{source_directory}/%(title)s.%(ext)s",
+        "-v",
+        playlist_url,
+    ]
+    subprocess.run(command)
+    
     for quality in quality_list:
         quality_name = quality["name"]
         quality_profile = quality["profile"]
@@ -88,18 +98,6 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
         quality_bitrate = quality["bitrate"]
 
         print(f"{quality_name} 퀄리티로 HLS 파일 생성 중...")
-
-        # playlist의 영상 다운로드
-        command = [
-            "yt-dlp",
-            "-f",
-            "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
-            "-o",
-            f"{source_directory}/%(title)s.%(ext)s",
-            "-v",
-            playlist_url,
-        ]
-        subprocess.run(command)
 
         # original 폴더에 다운로드된 모든 파일을 해당 퀄리티로 HLS로 변환
         for file_name in os.listdir(source_directory):
@@ -152,7 +150,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
 start_time = time.time()
-download_and_convert(playlist_url, "m", abr_qualities, 1)
+download_and_convert(playlist_url, "z", abr_qualities, 1)
 end_time = time.time()
 execution_time = end_time - start_time
 print(f"실행 시간 ======> {execution_time}초")
