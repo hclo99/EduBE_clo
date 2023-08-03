@@ -6,6 +6,7 @@ import shutil
 import dotenv
 import time
 from ABR_quality import abr_qualities
+from concurrent.futures import ThreadPoolExecutor
 
 dotenv.load_dotenv()
 dbname = os.getenv("PY_DB")
@@ -75,18 +76,22 @@ def create_variant_m3u8(file_path, segments):
     s3.upload_file(file_path, bucket_name, os.path.basename(file_path))   
 
 
-def download_and_convert(playlist_url, prefix, quality_list, topicId):
-    # playlist의 영상 다운로드
+def download_video(url, target_directory):
     command = [
         "yt-dlp",
         "-f",
         "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "-o",
-        f"{source_directory}/%(title)s.%(ext)s",
+        f"{target_directory}/%(title)s.%(ext)s",
         "-v",
-        playlist_url,
+        url,
     ]
     subprocess.run(command)
+
+
+def download_and_convert(playlist_url, prefix, quality_list, topicId):
+    with ThreadPoolExecutor() as executor:
+        executor.submit(download_video, playlist_url, source_directory)
     
     for quality in quality_list:
         quality_name = quality["name"]
