@@ -49,6 +49,18 @@ def upload_s3(file_name, new_name, quality, topicId):
 
         # 변환된 파일들을 process 디렉토리에서 output 디렉토리로 이동
         shutil.move(local_path, os.path.join(output_directory, file_name))
+        
+    variant_m3u8_file = os.path.join(output_directory, f"{new_name}-variant.m3u8")
+    s3.upload_file(variant_m3u8_file, bucket_name, f"{new_name}-variant.m3u8")
+
+
+def create_m3u8_file(file_path, segments):
+    with open(file_path, "w") as f:
+        f.write("#EXTM3U\n")
+
+        for segment in segments:
+            f.write(f"#EXTINF#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
+            f.write(f"{segment['url']}\n")
 
 
 def download_and_convert(playlist_url, prefix, quality_list, topicId):
@@ -94,7 +106,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
                 "-start_number",
                 "0",
                 "-hls_time",
-                "10",
+                "60",
                 "-hls_list_size",
                 "0",
                 "-b:v",
@@ -105,37 +117,26 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
             ]
             subprocess.run(command)
 
-            # S3 업로드 (퀄리티별로 생성된 ts 파일들을 S3에 업로드)
-            upload_s3(file_name, new_name, quality_name, topicId)
+    # 퀄리티별로 생성된 m3u8 파일들을 포함한 variant m3u8 파일 생성
+    segments = [
+        {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
+        {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
+        {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
+    ]
+    create_m3u8_file(os.path.join(output_directory, f"{new_name}-variant.m3u8"), segments)
 
-            # 원본 .mp4 파일을 output 디렉토리로 이동 (S3 업로드까지 완료되어야 옮겨짐)
-            shutil.move(source_file, os.path.join(output_directory, file_name))
+    # S3 업로드 (퀄리티별로 생성된 ts 파일들을 S3에 업로드)
+    upload_s3(file_name, new_name, quality_name, topicId)
 
-
-def create_m3u8_file(file_path, segments):
-    with open(file_path, "w") as f:
-        f.write("#EXTM3U\n")
-
-        for segment in segments:
-            f.write(f"#EXTINF#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
-            f.write(f"{segment['url']}\n")
-
-segments = [
-    {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
-    {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
-    {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
-]
-
-output_directory =  f"{path}"
-create_m3u8_file(os.path.join(output_directory, f"{new_name}-variant.m3u8"), segments)
-
+    # 원본 .mp4 파일을 output 디렉토리로 이동 
+    shutil.move(source_file, os.path.join(output_directory, file_name))
 
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
 download_and_convert(playlist_url, "h", abr_qualities, 1)
-create_m3u8_file()
 
 
-# variant 파일 생성되도록
 # view 파일 생성되도록 
 # 원본파일 마지막에 이동되도록
+# 여러파일이 다운로드 되었을 때의 이름 변경
+# 여러파일이 다운로드 될 때 로직 확인
