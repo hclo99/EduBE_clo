@@ -70,7 +70,7 @@ def create_variant_m3u8(file_path, segments):
         f.write("#EXTM3U\n")
 
         for segment in segments:
-            f.write(f"#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']},\n")
+            f.write(f"#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH={segment['BANDWIDTH']}\n")
             f.write(f"{segment['url']}\n")
 
     s3 = session.client("s3")
@@ -152,7 +152,7 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
 # 함수 실행
 playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
 start_time = time.time()
-download_and_convert(playlist_url, "h", abr_qualities, 1)
+download_and_convert(playlist_url, "m", abr_qualities, 1)
 end_time = time.time()
 execution_time = end_time - start_time
 print(f"실행 시간 ======> {execution_time}초")
