@@ -135,7 +135,7 @@ def convert_video(playlist_url, prefix, quality_list, topicId):
     for file_name in os.listdir(source_directory):
         new_name = generate_filename(prefix)
 
-        with ProcessPoolExecutor(max_workers=5) as executor:
+        with ProcessPoolExecutor(max_workers=4) as executor:
               executor.map(
                 convert_video_process,
                 (file_name for _ in range(len(quality_list))),
