@@ -27,12 +27,12 @@ export class ContentsController {
       .sort((a, b) => b.id - a.id);
   }
 
-  // 기본 경로. 헤더 토큰 Id를 읽어서 level별 토픽 및 영상 전송
-  @UseGuards(AuthGuard)
-  @Get('/level')
-  async getFilesByUserLevel(@Request() req) {
-    const userId = req.user.sub; // AuthGuard를 통해 얻은 사용자 ID
-    const level = await this.authService.getUserLevel(userId);
+  // 헤더 토큰 Id를 읽어서 level별 토픽 및 영상 전송
+  // @UseGuards(AuthGuard)
+  @Get('/level/:level')
+  async getFilesByUserLevel(@Param('level') level: number) {
+    // const userId = req.user.sub; // AuthGuard를 통해 얻은 사용자 ID
+    // const level = await this.authService.getUserLevel(userId);
     const topicIds = await this.contentsService.findTopicsByLevel(level);
     console.log('fr: ', topicIds);
 
