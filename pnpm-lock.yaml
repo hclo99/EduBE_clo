@@ -65,6 +65,9 @@ dependencies:
   typeorm:
     specifier: ^0.3.17
     version: 0.3.17(pg@8.11.1)(ts-node@10.9.1)
+  websockets:
+    specifier: ^0.2.0
+    version: 0.2.0
 
 devDependencies:
   '@nestjs/cli':
@@ -5718,6 +5721,11 @@ packages:
       - esbuild
       - uglify-js
     dev: true
+
+  /websockets@0.2.0:
+    resolution: {integrity: sha512-GjhUvj0PfZMpsRI7BdyyM7wsaGDkDd3uMrFThWNyb3lQy8BxmLWxtE22W7pQpI7z703xht8j1fqVOjRkZIulUw==}
+    engines: {node: '>=0.4.10'}
+    dev: false
 
   /whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
