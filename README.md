@@ -42,22 +42,23 @@
 
 <details>
 <summary> #1 로직 구성 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/f5096a2d-a707-4ff7-98af-cf92b950ed35">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/906704e6-7c5e-4cf3-865b-11fb96488fe7">
 <img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/b2a72318-71b8-490d-b2cf-8bad6b5522f2">
 
 </details>
 
 <details>
 <summary> #2 ABR 자동화 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/fa0ae885-3661-40c8-ae2f-19b9eca08ab5">
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/9791362e-7aef-4795-b1a7-dd9e008b7af7">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/906704e6-7c5e-4cf3-865b-11fb96488fe7">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/050c45c3-09a8-49a6-bb11-c1496f9b0b6e">
+
 
 </details>
 
 <details>
 <summary> #3 ABR 속도개선 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/7b0a06ed-8943-430e-b929-9061c156794a">
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/89952e5d-c4cc-41c2-822b-c3a7fd026260">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/9af7fa5e-6d35-414a-9257-1971521a6383">
+
 
 </details>
 
