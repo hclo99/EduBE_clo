@@ -6,7 +6,8 @@ import shutil
 import dotenv
 import time
 from ABR_quality import abr_qualities
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+from multiprocessing import freeze_support
 
 dotenv.load_dotenv()
 dbname = os.getenv("PY_DB")
@@ -47,7 +48,6 @@ def upload_s3(file_name, new_name, quality, topicId):
         s3.upload_file(local_path, bucket_name, file_name)
         shutil.move(local_path, os.path.join(output_directory, file_name))
 
-    
     with ThreadPoolExecutor() as executor:
         executor.map(upload_single_file, os.listdir(process_directory))
 
@@ -88,78 +88,89 @@ def download_video(url, target_directory):
     subprocess.run(command)
 
 
-def download_and_convert(playlist_url, prefix, quality_list, topicId):
+def convert_video_process(file_name, quality, source_directory, process_directory, new_name):
+    if not file_name.endswith(".mp4"):
+        return
+    source_file = os.path.join(source_directory, file_name)
+    quality_name = quality["name"]
+    quality_profile = quality["profile"]
+    quality_level = quality["level"]
+    quality_type = quality["type"]
+    quality_resolution = quality["resolution"]
+    quality_time = quality["time"]
+    quality_bitrate = quality["bitrate"]
+
+    print(f"{quality_name} 퀄리티로 HLS 파일 생성 중...")
+    
+    dest_file = os.path.join(process_directory, f"{new_name}_{quality_name}.m3u8")
+
+    command = [
+        "ffmpeg",
+        "-i",
+        source_file,
+        "-profile:v",
+        quality_profile,
+        "-level",
+        quality_level,
+        quality_type,
+        quality_resolution,
+        "-start_number",
+        "0",
+        "-hls_time",
+        quality_time,
+        "-hls_list_size",
+        "0",
+        "-b:v",
+        quality_bitrate,
+        "-f",
+        "hls",
+        dest_file,
+    ]
+    subprocess.run(command)
+        
+def convert_video(playlist_url, prefix, quality_list, topicId):
     with ThreadPoolExecutor() as executor:
         executor.submit(download_video, playlist_url, source_directory)
-    
-    for quality in quality_list:
-        quality_name = quality["name"]
-        quality_profile = quality["profile"]
-        quality_level = quality["level"]
-        quality_type = quality["type"]
-        quality_resolution = quality["resolution"]
-        quality_time = quality["time"]
-        quality_bitrate = quality["bitrate"]
 
-        print(f"{quality_name} 퀄리티로 HLS 파일 생성 중...")
+    for file_name in os.listdir(source_directory):
+        new_name = generate_filename(prefix)
 
-        # original 폴더에 다운로드된 모든 파일을 해당 퀄리티로 HLS로 변환
-        for file_name in os.listdir(source_directory):
-            if not file_name.endswith(".mp4"):
-                continue
-            source_file = os.path.join(source_directory, file_name)
-            new_name = generate_filename(prefix)
-            dest_file = os.path.join(process_directory, f"{new_name}_{quality_name}.m3u8")
+        with ProcessPoolExecutor(max_workers=5) as executor:
+              executor.map(
+                convert_video_process,
+                (file_name for _ in range(len(quality_list))),
+                quality_list,
+                (source_directory for _ in range(len(quality_list))),
+                (process_directory for _ in range(len(quality_list))),
+                (new_name for _ in range(len(quality_list))),
+            )
 
-            command = [
-                "ffmpeg",
-                "-i",
-                source_file,
-                "-profile:v",
-                quality_profile,
-                "-level",
-                quality_level,
-                quality_type,
-                quality_resolution,
-                "-start_number",
-                "0",
-                "-hls_time",
-                quality_time,
-                "-hls_list_size",
-                "0",
-                "-b:v",
-                quality_bitrate,
-                "-f",
-                "hls",
-                dest_file,
-            ]
-            subprocess.run(command)
 
-    modify_m3u8_file(os.path.join(process_directory, f"{new_name}_view.m3u8"))
+        modify_m3u8_file(os.path.join(process_directory, f"{new_name}_view.m3u8"))
 
-    # 퀄리티별로 생성된 m3u8 파일들을 포함한 variant m3u8 파일 생성
-    segments = [
-        {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
-        {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
-        {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
-    ]
-    create_variant_m3u8(os.path.join(output_directory, f"{new_name}_variant.m3u8"), segments)
+        # 퀄리티별로 생성된 m3u8 파일들을 포함한 variant m3u8 파일 생성
+        segments = [
+            {"BANDWIDTH": 1280000, "url": f"{new_name}_L.m3u8"},
+            {"BANDWIDTH": 2560000, "url": f"{new_name}_M.m3u8"},
+            {"BANDWIDTH": 7680000, "url": f"{new_name}_H.m3u8"},
+        ]
+        create_variant_m3u8(os.path.join(output_directory, f"{new_name}_variant.m3u8"), segments)
 
-    # S3에 HLS 파일 업로드
-    with ThreadPoolExecutor() as executor:
-        executor.submit(upload_s3, file_name, new_name, quality_name, topicId)
+        # S3에 HLS 파일 업로드
+        with ThreadPoolExecutor() as executor:
+            executor.submit(upload_s3, file_name, new_name, quality_list, topicId)
+            
+        # 원본 .mp4 파일을 output 디렉토리로 이동 
+        shutil.move(os.path.join(source_directory, file_name), os.path.join(output_directory, file_name))
 
-    # 원본 .mp4 파일을 output 디렉토리로 이동 
-    shutil.move(source_file, os.path.join(output_directory, file_name))
-
-# 함수 실행
-playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
-start_time = time.time()
-download_and_convert(playlist_url, "z", abr_qualities, 1)
-end_time = time.time()
-execution_time = end_time - start_time
-print(f"실행 시간 ======> {execution_time}초")
-
+if __name__ == '__main__':
+    freeze_support()
+    playlist_url = "https://www.youtube.com/watch?v=rAiKQMfcqYA"
+    start_time = time.time()
+    convert_video(playlist_url, "z", abr_qualities, 1)
+    end_time = time.time()
+    execution_time = end_time - start_time
+    print(f"실행 시간 ======> {execution_time}초")
 
 # 여러파일이 다운로드 되었을 때의 이름 변경
 # 여러파일이 다운로드 될 때 로직 확인
