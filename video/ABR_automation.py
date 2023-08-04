@@ -42,15 +42,14 @@ def generate_filename(prefix):
 def upload_s3(file_name, new_name, quality, topicId):
     s3 = session.client("s3")
 
-    # S3 업로드
-    for file_name in os.listdir(process_directory):  
-        local_path = os.path.join(
-            process_directory, file_name
-        ) 
+    def upload_single_file(file_name):
+        local_path = os.path.join(process_directory, file_name)
         s3.upload_file(local_path, bucket_name, file_name)
-
-        # 변환된 파일들을 process 디렉토리에서 output 디렉토리로 이동
         shutil.move(local_path, os.path.join(output_directory, file_name))
+
+    
+    with ThreadPoolExecutor() as executor:
+        executor.map(upload_single_file, os.listdir(process_directory))
 
 
 def modify_m3u8_file(file_path):
@@ -146,8 +145,9 @@ def download_and_convert(playlist_url, prefix, quality_list, topicId):
     ]
     create_variant_m3u8(os.path.join(output_directory, f"{new_name}_variant.m3u8"), segments)
 
-    # S3 업로드 (퀄리티별로 생성된 ts 파일들을 S3에 업로드)
-    upload_s3(file_name, new_name, quality_name, topicId)
+    # S3에 HLS 파일 업로드
+    with ThreadPoolExecutor() as executor:
+        executor.submit(upload_s3, file_name, new_name, quality_name, topicId)
 
     # 원본 .mp4 파일을 output 디렉토리로 이동 
     shutil.move(source_file, os.path.join(output_directory, file_name))
@@ -161,6 +161,5 @@ execution_time = end_time - start_time
 print(f"실행 시간 ======> {execution_time}초")
 
 
-# 영상 다운로드를 for문 밖으로 빼기
 # 여러파일이 다운로드 되었을 때의 이름 변경
 # 여러파일이 다운로드 될 때 로직 확인
