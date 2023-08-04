@@ -4,7 +4,7 @@
 
 * **프로젝트명** : EduPlayM
 * **기간** : 23.07.25(화) ~ 23.08.04(금) [2주]
-* **주제** : 영어 미디어 콘텐츠 학습 서비스
+* **주제** : 영어 미디어 콘텐츠 학습 서비스 [site](https://edu-otrpw96ns-eduplay.vercel.app/contents/level/1)
 * **기능들** :<br> 
 [메인페이지] 유저 레벨별, 주제별 다양한 영어 학습 영상 제공 <br>
 [상세페이지] 영상에서 확인할 수 있는 문장이 퀴즈로 제공. 퀴즈 정답률에 따라 유저의 레벨 변경<br>
@@ -42,22 +42,23 @@
 
 <details>
 <summary> #1 로직 구성 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/f5096a2d-a707-4ff7-98af-cf92b950ed35">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/906704e6-7c5e-4cf3-865b-11fb96488fe7">
 <img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/b2a72318-71b8-490d-b2cf-8bad6b5522f2">
 
 </details>
 
 <details>
 <summary> #2 ABR 자동화 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/fa0ae885-3661-40c8-ae2f-19b9eca08ab5">
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/9791362e-7aef-4795-b1a7-dd9e008b7af7">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/906704e6-7c5e-4cf3-865b-11fb96488fe7">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/050c45c3-09a8-49a6-bb11-c1496f9b0b6e">
+
 
 </details>
 
 <details>
 <summary> #3 ABR 속도개선 </summary>
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/7b0a06ed-8943-430e-b929-9061c156794a">
-<img src="https://github.com/project-codeblue/CodeBlue/assets/76824986/89952e5d-c4cc-41c2-822b-c3a7fd026260">
+<img src="https://github.com/hclo99/EduBE_clo/assets/129303771/9af7fa5e-6d35-414a-9257-1971521a6383">
+
 
 </details>
 
@@ -65,13 +66,13 @@
 
 # 🚩 API 명세서
 
-![API 명세서]
+[API 명세서](https://www.notion.so/itube/API-f192bc5d24864fd3a1ca77da18a83d9d?pvs=4)
 
 <br>
 
 #  📒 ERD
 
-![2023-06-26 14;29;26]
+![image](https://github.com/hclo99/EduBE_clo/assets/129303771/613b75e4-aa24-417a-84a6-fa8929e24913)
 
 
 <br>
