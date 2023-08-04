@@ -4,6 +4,7 @@ import { Content } from '../entity/contents.entity';
 import { Repository } from 'typeorm';
 import { Quiz } from '../entity/quiz.entity';
 import { Topic } from '../entity/topic.entity';
+import { LevelTopic } from '../entity/level.topic.entity';
 
 @Injectable()
 export class ContentsService {
@@ -11,6 +12,7 @@ export class ContentsService {
     @InjectRepository(Content) private contentRepo: Repository<Content>,
     @InjectRepository(Quiz) private quizRepo: Repository<Quiz>,
     @InjectRepository(Topic) private topicRepo: Repository<Topic>,
+    @InjectRepository(LevelTopic) private levelRepo: Repository<LevelTopic>,
   ) {}
 
   async findAllFiles(): Promise<{ file: Content; quiz: Quiz }[]> {
@@ -23,22 +25,43 @@ export class ContentsService {
     });
   }
 
-  async findByTopic(topicId: number): Promise<{ file: Content; quiz: Quiz }[]> {
+  // 1. 특정 level에 속하는 topicId 배열
+  async findTopicsByLevel(level: number): Promise<number[]> {
+    const levelTopics = await this.levelRepo.find({
+      where: { level: level },
+      relations: ['topic'],
+    });
+    // console.log(levelTopics);
+    const topicIds = levelTopics.map((levelTopic) => levelTopic.topic.id);
+    return topicIds;
+  }
+
+  // 2. 특정 topicId에 대한 Content 및 Quiz
+  async findFilesByTopic(topicId: number): Promise<{
+    topicId: number;
+    name: string;
+    files: { file: Content; quiz: Quiz }[];
+  }> {
     const files = await this.contentRepo.find({
       where: { topic: { id: topicId } },
     });
-    // console.log('hi1');
-    // const topic = await this.topicRepo.findOne({ where: { id: topicId } });
-    // console.log('hi2');
+    const topic = await this.topicRepo.findOne({ where: { id: topicId } });
     const quizzes = await this.findQuizzesByTopic(topicId);
-    // console.log('hi3');
-    return files.map((file) => {
+
+    const fileObjects = files.map((file) => {
       const randomQuiz = quizzes[Math.floor(Math.random() * quizzes.length)];
       return { file, quiz: randomQuiz };
     });
+
+    console.log('fr: topicId: ', topicId, fileObjects);
+    return {
+      topicId: topicId,
+      name: topic.name,
+      files: fileObjects,
+    };
   }
 
-  async findByName(name: string): Promise<Content> {
+  async findFileByName(name: string): Promise<Content> {
     const file = await this.contentRepo.findOne({
       where: { name: name },
       relations: ['topic'],
