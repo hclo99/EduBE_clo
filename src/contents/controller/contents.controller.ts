@@ -19,7 +19,7 @@ export class ContentsController {
           id: file.id,
           name: file.name,
           url: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_variant.m3u8`,
-          thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}-view.m3u8`,
+          thumbnailUrl: `https://d1gvhezy2xavcm.cloudfront.net/${file.name}_view.m3u8`,
           length: file.length,
           quiz: quiz.quiz,
         };
