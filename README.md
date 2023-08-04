@@ -18,7 +18,7 @@
 |:--------------|:--------------|:--------------------------------------------------|
 | Frontend       | 전정훈        | [tube-jeonghoon](https://github.com/tube-jeonghoon)         |
 | Backend       | 정혜승        | [hclo99](https://github.com/hclo99)     |
-| Backend       | 허지수        | []()     |
+| Backend       | 허지수        | [suji6707](https://github.com/suji6707)     |
 
 
 <br>
