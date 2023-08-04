@@ -4,8 +4,9 @@ import { AuthService } from '../service/auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
+  @HttpCode(HttpStatus.OK)
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto) {
     await this.authService.create(
@@ -13,6 +14,7 @@ export class AuthController {
       body.email,
       body.password,
       body.level,
+      body.matchedNum
     );
   }
 

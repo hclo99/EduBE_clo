@@ -5,15 +5,18 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { name: 'name', length: 20 })
-  name: string;
+  @Column({ type: 'varchar', name: 'name', length: 20, default: '' })
+  name?: string;
 
-  @Column('varchar', { name: 'email', unique: true, length: 30 })
+  @Column({ type: 'varchar', name: 'email', unique: true, length: 30 })
   email: string;
 
-  @Column('varchar', { name: 'password', length: 30 })
+  @Column({ type: 'varchar', name: 'password', length: 30 })
   password: string;
 
-  @Column('int', { name: 'level' })
+  @Column({ type: 'int', name: 'level' })
   level: number;
+
+  @Column({ type: 'int', name: 'matchedNum' })
+  matchedNum: number;
 }

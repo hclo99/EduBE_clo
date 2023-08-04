@@ -1,16 +1,17 @@
 ### Create a new user
-POST http://localhost:8000/auth/signup
+POST https://eduplay.jisuheo.shop/auth/signup
 Content-Type: application/json
 
 {
-    "name": "sparta4",
-    "email": "sparta4@sparta.com",
-    "password": "qwer1234",
-    "level": 1
+    "name": "user1",
+    "email": "user1@gmail.com",
+    "password": "1234",
+    "level": 1,
+    "matchedNum": 0
 }
 
 ### login 
-POST http://localhost:8000/auth/login
+POST https://eduplay.jisuheo.shop/login
 Content-Type: application/json
 
 {
