@@ -16,9 +16,7 @@ export class ContentsGateway {
 
   constructor(private contentsService: ContentsService) {}
 
-  private currentQuiz = 0;
-  // quizzes 배열에서 + 1 로직.
-  private quizzes: Quiz[] = [];
+  private currentQuizIndex = 0; // quizzes 배열 인덱스
 
   @SubscribeMessage('startQuiz')
   async handleStartQuiz(
@@ -26,10 +24,10 @@ export class ContentsGateway {
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     console.log('io: ', topicId);
-    const quizzes = await this.contentsService.findQuizzesByTopic(topicId); // quizzes 프로퍼티만 추출하여 할당
-    this.quizzes = quizzes;
-    // client.emit('sendQuiz', this.quizzes);
-    this.sendRandomQuiz(client);
+
+    const quizzes = await this.contentsService.findQuizzesByTopic(topicId);
+    this.currentQuizIndex = 0; // 퀴즈 시작 시 인덱스 초기화
+    this.sendQuiz(client, quizzes, topicId);
   }
 
   @SubscribeMessage('sendAnswer')
@@ -38,30 +36,26 @@ export class ContentsGateway {
     @ConnectedSocket() client: Socket,
   ): Promise<void> {
     console.log('Received answer: ', answerData);
+
+    // $ User.matchedNum + 1 증가시킴
   }
 
-  private sendRandomQuiz(client: Socket): void {
-    // 랜덤 인덱스 생성
-    const randomIndex = Math.floor(Math.random() * this.quizzes.length);
-    // 해당 인덱스의 퀴즈 선택
-    const quiz = this.quizzes[randomIndex];
-    console.log('quiz: ', quiz);
-    // 선택된 퀴즈를 배열에서 제거
-    this.quizzes.splice(randomIndex, 1);
-    // 선택된 퀴즈를 클라이언트에게 전송
-    client.emit('sendQuiz', quiz);
+  private sendQuiz(client: Socket, quizzes: Quiz[], topicId: number): void {
+    if (this.currentQuizIndex < quizzes.length) {
+      const quiz = quizzes[this.currentQuizIndex]; // 현재 인덱스의 퀴즈 선택
+      console.log('quiz: ', quiz);
+      client.emit('sendQuiz', quiz);
+      this.currentQuizIndex++;
+    } else {
+      // 모든 퀴즈를 통과
+      const message = `축하합니다, ${topicId} topic의 모든 퀴즈를 통과했습니다!`;
+      client.emit('congratulations', message);
+
+      // 새로운 topicId에 해당하는 다른 영상과 퀴즈 로드
+      // this.topicId = await this.contentsService.findNextTopicId(this.topicId);
+      // this.quizzes = await this.contentsService.findQuizzesByTopic(this.topicId);
+      // this.currentQuizIndex = 0;
+      // this.sendSequentialQuiz(client);
+    }
   }
 }
-
-// 클라이언트: socket.on('sendQuiz', 퀴즈 배열 받아서 - )
-// client.emit('quiz question', this.quizzes[this.currentQuiz].quiz);
-// this.quizzes[0].quiz)가 클라이언트에게 전송되므로, currentQuiz를 +1씩 늘리거나 하는 로직 필요
-
-/**
- * 영어 퀴즈를 시작하고, 사용자 답을 처리하며, 올바른 답이 제공되면 다음 퀴즈로 넘어간다.
- *
- * currentQuiz는 현재 진행 중인 퀴즈의 인덱스를 추적하는 데 사용됩니다.
- * 초기 값은 0으로 설정되어 있으며, 퀴즈가 진행되면서 사용자가 올바른 답을 제공하면 이 값이 증가합니다.
- *
- *
- */
