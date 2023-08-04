@@ -12,6 +12,9 @@ export class CreateUserDto {
 
   @IsNumber()
   level: number;
+
+  @IsNumber()
+  matchedNum: number;
 }
 
 export class LoginDto {
