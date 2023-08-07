@@ -7,9 +7,10 @@ import { Quiz } from './entity/quiz.entity';
 import { Topic } from './entity/topic.entity';
 import { ContentsGateway } from 'src/contents/service/contents.gateway';
 import { LevelTopic } from './entity/level.topic.entity';
+import { User } from 'src/auth/auth.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Content, Topic, Quiz, LevelTopic])],
+  imports: [TypeOrmModule.forFeature([Content, Topic, Quiz, LevelTopic, User])],
   providers: [ContentsService, ContentsGateway],
   controllers: [ContentsController],
 })
